@@ -96,7 +96,7 @@ export default function Detail() {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: "#ccc",
         justifyContent: "center",
         alignItems: "center",
     },
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
         zIndex: 1,
     },
     closeButtonText: {
-        color: "#fff",
+        color: "#ccc",
         fontSize: 30,
         fontWeight: "bold",
     },
