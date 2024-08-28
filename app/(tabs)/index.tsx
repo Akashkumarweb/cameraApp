@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from "react-native";
 import { CameraView, useCameraPermissions, CameraCapturedPicture, BarcodeScanningResult } from "expo-camera";
 import Slider from "@react-native-community/slider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -122,20 +122,29 @@ export default function CameraTab() {
     
 
     const saveBarcode = async (barcode: string) => {
-        if (!barcode) return;
+        if (!barcode) {
+            console.error("No barcode to save");
+            return;
+        }
+        console.log("Saving barcode:", barcode); // Debug: Check if the barcode is being passed correctly
         try {
             const savedBarcodesJson = await AsyncStorage.getItem('savedBarcodes');
-            const savedBarcodes: string[] = savedBarcodesJson ? JSON.parse(savedBarcodesJson) : [];
-            savedBarcodes.push(barcode);
+            let savedBarcodes = savedBarcodesJson ? JSON.parse(savedBarcodesJson) : [];
             if (!savedBarcodes.includes(barcode)) {
                 savedBarcodes.push(barcode);
                 await AsyncStorage.setItem('savedBarcodes', JSON.stringify(savedBarcodes));
+                setBarcodeResult(null);  // Close modal after saving
+                Alert.alert('Success', 'Barcode saved successfully');
+            } else {
+                Alert.alert('Notice', 'Barcode already saved');
             }
-            setBarcodeResult(null);  // Close modal after saving
         } catch (error) {
             console.error("Failed to save barcode", error);
+            Alert.alert('Error', 'Failed to save barcode');
         }
     };
+    
+    
     
     
 
@@ -227,6 +236,7 @@ export default function CameraTab() {
                     >
                         <Text style={styles.buttonText}>Save</Text>
                     </TouchableOpacity>
+
                 </View>
             </Modal>
 
