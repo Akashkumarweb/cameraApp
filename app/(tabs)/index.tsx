@@ -97,6 +97,20 @@ export default function CameraTab() {
         );
     }
 
+    const saveBarcode = async (barcode: string) => {
+        try {
+            const savedBarcodesJson = await AsyncStorage.getItem('savedBarcodes');
+            const savedBarcodes: string[] = savedBarcodesJson ? JSON.parse(savedBarcodesJson) : [];
+            savedBarcodes.push(barcode);
+            await AsyncStorage.setItem('savedBarcodes', JSON.stringify(savedBarcodes));
+            setBarcodeResult(null);  // Close modal after saving
+        } catch (error) {
+            console.error("Failed to save barcode", error);
+        }
+    };
+    
+    
+
     return (
         <View style={styles.container}>
             <CameraView
@@ -146,7 +160,7 @@ export default function CameraTab() {
                     )}
                 </View>
             </CameraView>
-            <Modal
+            {/* <Modal
                 animationType="slide"
                 transparent={true}
                 visible={!!barcodeResult}
@@ -162,7 +176,31 @@ export default function CameraTab() {
                         <Text style={styles.buttonText}>Close</Text>
                     </TouchableOpacity>
                 </View>
+            </Modal> */}
+            <Modal
+                animationType="slide"
+                transparent={true}
+                visible={!!barcodeResult}
+                onRequestClose={() => setBarcodeResult(null)}
+            >
+                <View style={styles.modalView}>
+                    <Text style={styles.modalText}>Barcode Detected:</Text>
+                    <Text style={styles.barcodeText}>{barcodeResult}</Text>
+                    <TouchableOpacity
+                        style={[styles.button, styles.buttonClose]}
+                        onPress={() => setBarcodeResult(null)}
+                    >
+                        <Text style={styles.buttonText}>Close</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                        style={[styles.button, styles.buttonSave]}
+                        onPress={() => saveBarcode(barcodeResult)}
+                    >
+                        <Text style={styles.buttonText}>Save</Text>
+                    </TouchableOpacity>
+                </View>
             </Modal>
+
         </View>
     );
 }

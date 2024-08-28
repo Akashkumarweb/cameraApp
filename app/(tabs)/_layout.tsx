@@ -22,6 +22,13 @@ export default function TabLayout() {
                     )
                 }}
             />
+              <Tabs.Screen 
+                name="SavedBarcodes"
+                options={{
+                    title: "Barcodes",
+                    tabBarIcon: ({ color }) => <FontAwesome size={28} name="barcode" color={color} />
+                }}
+            />
         </Tabs>
     )
 }
