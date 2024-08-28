@@ -4,6 +4,7 @@ import { CameraView, useCameraPermissions, CameraCapturedPicture, BarcodeScannin
 import Slider from "@react-native-community/slider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+
 interface Photo {
     uri: string;
 }
