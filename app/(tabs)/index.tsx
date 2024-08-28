@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Modal, Alert } from "react-native";
-import { CameraView, useCameraPermissions, CameraCapturedPicture, BarcodeScanningResult } from "expo-camera";
+import { CameraView, useCameraPermissions, BarcodeScanningResult } from "expo-camera";
 import Slider from "@react-native-community/slider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -109,9 +109,7 @@ export default function CameraTab() {
     if (!permission.granted) {
         return (
             <View style={styles.container}>
-                <Text >
-                    We need your permission to show the camera
-                </Text>
+                <Text >We need your permission to show the camera</Text>
                 <TouchableOpacity style={styles.button} onPress={requestPermission}>
                     <Text style={styles.buttonText}>Grant Permission</Text>
                 </TouchableOpacity>
@@ -121,6 +119,29 @@ export default function CameraTab() {
 
     
 
+    // const saveBarcode = async (barcode: string) => {
+    //     if (!barcode) {
+    //         console.error("No barcode to save");
+    //         return;
+    //     }
+    //     console.log("Saving barcode:", barcode);
+    //     try {
+    //         const savedBarcodesJson = await AsyncStorage.getItem('savedBarcodes');
+    //         let savedBarcodes = savedBarcodesJson ? JSON.parse(savedBarcodesJson) : [];
+    //         if (!savedBarcodes.includes(barcode)) {
+    //             savedBarcodes.push(barcode);
+    //             await AsyncStorage.setItem('savedBarcodes', JSON.stringify(savedBarcodes));
+    //             setBarcodeResult(null);  // Close modal after saving
+    //             Alert.alert('Success', 'Barcode saved successfully');
+    //         } else {
+    //             Alert.alert('Notice', 'Barcode already saved');
+    //         }
+    //     } catch (error) {
+    //         console.error("Failed to save barcode", error);
+    //         Alert.alert('Error', 'Failed to save barcode');
+    //     }
+    // };
+
     const saveBarcode = async (barcode: string) => {
         if (!barcode) {
             console.error("No barcode to save");
@@ -129,7 +150,9 @@ export default function CameraTab() {
         console.log("Saving barcode:", barcode); // Debug: Check if the barcode is being passed correctly
         try {
             const savedBarcodesJson = await AsyncStorage.getItem('savedBarcodes');
-            let savedBarcodes = savedBarcodesJson ? JSON.parse(savedBarcodesJson) : [];
+            let savedBarcodes: string[] = savedBarcodesJson ? JSON.parse(savedBarcodesJson) : [];
+    
+            // Check if barcode already exists in the saved barcodes
             if (!savedBarcodes.includes(barcode)) {
                 savedBarcodes.push(barcode);
                 await AsyncStorage.setItem('savedBarcodes', JSON.stringify(savedBarcodes));
@@ -143,6 +166,7 @@ export default function CameraTab() {
             Alert.alert('Error', 'Failed to save barcode');
         }
     };
+    
     
     
     
@@ -228,7 +252,7 @@ export default function CameraTab() {
                         style={[styles.button, styles.buttonSave]}
                         onPress={() => {
                             if (barcodeResult) {
-                                saveBarcode(barcodeResult);
+                                saveBarcode(barcodeResult); // Ensure this is called with the correct barcode
                             } else {
                                 console.error("No barcode to save");
                             }
@@ -236,6 +260,7 @@ export default function CameraTab() {
                     >
                         <Text style={styles.buttonText}>Save</Text>
                     </TouchableOpacity>
+
 
                 </View>
             </Modal>
