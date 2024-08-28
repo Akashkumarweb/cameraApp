@@ -78,22 +78,15 @@ export default function CameraTab() {
         setIsBarcodeMode((prev) => !prev);
     }, []);
 
-    // const handleBarCodeScanned = useCallback(
-    //     ({ data }: BarcodeScanningResult) => {
-    //         setBarcodeResult(data);
-    //     },
-    //     []
-    // );
     const handleBarCodeScanned = useCallback(({ type, data }: BarcodeScanningResult) => {
         const now = Date.now();
         if (now - lastScanTime > scanInterval) {
-            // Determine the size of the focus area based on the barcode type
             let newSize;
             switch (type) {
-                case 'qr':  // QR codes are typically square
+                case 'qr':
                     newSize = { width: 200, height: 200 };
                     break;
-                case 'ean13':  // EAN-13 barcodes are typically rectangular
+                case 'ean13':
                 case 'ean8':
                     newSize = { width: 300, height: 100 };
                     break;
@@ -102,7 +95,6 @@ export default function CameraTab() {
                     break;
             }
     
-            // Update the state for focus area size and barcode result
             setFocusAreaSize(newSize);
             setBarcodeResult(data);
             setLastScanTime(now);
@@ -135,7 +127,6 @@ export default function CameraTab() {
             const savedBarcodesJson = await AsyncStorage.getItem('savedBarcodes');
             const savedBarcodes: string[] = savedBarcodesJson ? JSON.parse(savedBarcodesJson) : [];
             savedBarcodes.push(barcode);
-            // await AsyncStorage.setItem('savedBarcodes', JSON.stringify(savedBarcodes));
             if (!savedBarcodes.includes(barcode)) {
                 savedBarcodes.push(barcode);
                 await AsyncStorage.setItem('savedBarcodes', JSON.stringify(savedBarcodes));
@@ -209,23 +200,6 @@ export default function CameraTab() {
                     )}
                 </View>
             </CameraView>
-            {/* <Modal
-                animationType="slide"
-                transparent={true}
-                visible={!!barcodeResult}
-                onRequestClose={() => setBarcodeResult(null)}
-            >
-                <View style={styles.modalView}>
-                    <Text style={styles.modalText}>Barcode Detected:</Text>
-                    <Text style={styles.barcodeText}>{barcodeResult}</Text>
-                    <TouchableOpacity
-                        style={[styles.button, styles.buttonClose]}
-                        onPress={() => setBarcodeResult(null)}
-                    >
-                        <Text style={styles.buttonText}>Close</Text>
-                    </TouchableOpacity>
-                </View>
-            </Modal> */}
             <Modal
                 animationType="slide"
                 transparent={true}
