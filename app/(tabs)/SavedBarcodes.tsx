@@ -6,6 +6,7 @@ import * as FileSystem from 'expo-file-system';
 
 export default function SavedBarcodes() {
     const [barcodes, setBarcodes] = useState([]);
+    const [isSharing, setIsSharing] = useState(false);
 
     useEffect(() => {
         loadBarcodes();
@@ -28,6 +29,11 @@ export default function SavedBarcodes() {
     };
 
     const saveToFile = async () => {
+        if (isSharing) {
+            Alert.alert('Please wait', 'A sharing action is already in progress.');
+            return;
+        }
+
         const fileName = `GMB-BarCode-${new Date().getTime()}.txt`;
         const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
     
@@ -40,15 +46,18 @@ export default function SavedBarcodes() {
                 Alert.alert('Sharing not available', 'Your platform does not support sharing files.');
                 return;
             }
-    
+            
+            setIsSharing(true);
             await Sharing.shareAsync(fileUri, {
                 mimeType: 'text/plain', // Mime type can be changed depending on what type of file you are sharing
                 dialogTitle: 'Share your barcode file',
                 UTI: 'public.text' // For iOS
             });
+            setIsSharing(false);
         } catch (error) {
             console.error('Failed to save or share file', error);
             Alert.alert('Error', 'Failed to save or share file');
+            setIsSharing(false);
         }
     };
 
