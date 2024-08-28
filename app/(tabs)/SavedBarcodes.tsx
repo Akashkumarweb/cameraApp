@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Sharing from 'expo-sharing';
 import * as FileSystem from 'expo-file-system';
 
 export default function SavedBarcodes() {
@@ -28,16 +29,26 @@ export default function SavedBarcodes() {
 
     const saveToFile = async () => {
         const fileName = `GMB-BarCode-${new Date().getTime()}.txt`;
-        const fileUri = `${FileSystem.documentDirectory}${fileName}`;
-
+        const fileUri = `${FileSystem.cacheDirectory}${fileName}`;
+    
         try {
             await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(barcodes), {
                 encoding: FileSystem.EncodingType.UTF8
             });
-            Alert.alert('Success', `Barcodes saved to file:\n${fileUri}`);
+    
+            if (!(await Sharing.isAvailableAsync())) {
+                Alert.alert('Sharing not available', 'Your platform does not support sharing files.');
+                return;
+            }
+    
+            await Sharing.shareAsync(fileUri, {
+                mimeType: 'text/plain', // Mime type can be changed depending on what type of file you are sharing
+                dialogTitle: 'Share your barcode file',
+                UTI: 'public.text' // For iOS
+            });
         } catch (error) {
-            console.error('Failed to save file', error);
-            Alert.alert('Error', 'Failed to save file');
+            console.error('Failed to save or share file', error);
+            Alert.alert('Error', 'Failed to save or share file');
         }
     };
 
