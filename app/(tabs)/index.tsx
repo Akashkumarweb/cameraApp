@@ -16,6 +16,10 @@ export default function CameraTab() {
     const [isBarcodeMode, setIsBarcodeMode] = useState(false);
     const [barcodeResult, setBarcodeResult] = useState<string | null>(null);
     const cameraRef = useRef<CameraView>(null);
+    const [lastScanTime, setLastScanTime] = useState(0);
+    const scanInterval = 3000; // 3000 milliseconds or 3 seconds between scans
+    const [focusAreaSize, setFocusAreaSize] = useState({ width: 200, height: 200 });
+
 
     useEffect(() => {
         loadSavedPhotos();
@@ -73,12 +77,37 @@ export default function CameraTab() {
         setIsBarcodeMode((prev) => !prev);
     }, []);
 
-    const handleBarCodeScanned = useCallback(
-        ({ data }: BarcodeScanningResult) => {
+    // const handleBarCodeScanned = useCallback(
+    //     ({ data }: BarcodeScanningResult) => {
+    //         setBarcodeResult(data);
+    //     },
+    //     []
+    // );
+    const handleBarCodeScanned = useCallback(({ type, data }: BarcodeScanningResult) => {
+        const now = Date.now();
+        if (now - lastScanTime > scanInterval) {
+            // Determine the size of the focus area based on the barcode type
+            let newSize;
+            switch (type) {
+                case 'qr':  // QR codes are typically square
+                    newSize = { width: 200, height: 200 };
+                    break;
+                case 'ean13':  // EAN-13 barcodes are typically rectangular
+                case 'ean8':
+                    newSize = { width: 300, height: 100 };
+                    break;
+                default:
+                    newSize = { width: 200, height: 200 };
+                    break;
+            }
+    
+            // Update the state for focus area size and barcode result
+            setFocusAreaSize(newSize);
             setBarcodeResult(data);
-        },
-        []
-    );
+            setLastScanTime(now);
+        }
+    }, [lastScanTime, scanInterval, setFocusAreaSize, setBarcodeResult]);
+    
 
     if (!permission) {
         return <View />;
@@ -97,12 +126,19 @@ export default function CameraTab() {
         );
     }
 
+    
+
     const saveBarcode = async (barcode: string) => {
+        if (!barcode) return;
         try {
             const savedBarcodesJson = await AsyncStorage.getItem('savedBarcodes');
             const savedBarcodes: string[] = savedBarcodesJson ? JSON.parse(savedBarcodesJson) : [];
             savedBarcodes.push(barcode);
-            await AsyncStorage.setItem('savedBarcodes', JSON.stringify(savedBarcodes));
+            // await AsyncStorage.setItem('savedBarcodes', JSON.stringify(savedBarcodes));
+            if (!savedBarcodes.includes(barcode)) {
+                savedBarcodes.push(barcode);
+                await AsyncStorage.setItem('savedBarcodes', JSON.stringify(savedBarcodes));
+            }
             setBarcodeResult(null);  // Close modal after saving
         } catch (error) {
             console.error("Failed to save barcode", error);
@@ -130,6 +166,18 @@ export default function CameraTab() {
                 }}
                 onBarcodeScanned={isBarcodeMode ? handleBarCodeScanned : undefined}
             >
+                <View style={[
+                    styles.focusArea, 
+                    { 
+                        width: focusAreaSize.width, 
+                        height: focusAreaSize.height,
+                        transform: [
+                            { translateX: -(focusAreaSize.width / 2) }, 
+                            { translateY: -(focusAreaSize.height / 2) }
+                        ]
+                    }
+                ]} />
+
                 <View style={styles.controlsContainer}>
                     <View style={styles.row}>
                         <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
@@ -281,5 +329,13 @@ const styles = StyleSheet.create({
     },
     buttonSave: {
         backgroundColor: "#4CAF50",  // Green color for the save button
+    },
+    focusArea: {
+        borderWidth: 2,
+        borderColor: 'red',
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+       
     },
 });
