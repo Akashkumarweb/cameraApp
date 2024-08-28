@@ -194,7 +194,13 @@ export default function CameraTab() {
                     </TouchableOpacity>
                     <TouchableOpacity
                         style={[styles.button, styles.buttonSave]}
-                        onPress={() => saveBarcode(barcodeResult)}
+                        onPress={() => {
+                            if (barcodeResult) {
+                                saveBarcode(barcodeResult);
+                            } else {
+                                console.error("No barcode to save");
+                            }
+                        }}
                     >
                         <Text style={styles.buttonText}>Save</Text>
                     </TouchableOpacity>
@@ -255,27 +261,25 @@ const styles = StyleSheet.create({
         padding: 35,
         alignItems: "center",
         shadowColor: "#000",
-        shadowOffset: {
-        width: 0,
-        height: 2,
-        },
+        shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.25,
         shadowRadius: 4,
         elevation: 5,
     },
     modalText: {
-        marginBottom: 15,
-        textAlign: "center",
         fontSize: 18,
-        fontWeight: "bold",
-        },
-        barcodeText: {
         marginBottom: 15,
         textAlign: "center",
+        fontWeight: "bold",
+    },
+    barcodeText: {
         fontSize: 16,
+        marginBottom: 15,
     },
     buttonClose: {
         backgroundColor: "#2196F3",
-        marginTop: 10,
-    }
+    },
+    buttonSave: {
+        backgroundColor: "#4CAF50",  // Green color for the save button
+    },
 });
